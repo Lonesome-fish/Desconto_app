@@ -2,28 +2,32 @@ from src.app.frameworks.database.memory_database import MemoryDatabase
 from src.app.adapters.repositories.memory_pedido_repository import MemoryPedidoRepository
 from src.app.use_cases.criar_pedido import CriarPedido
 from src.app.adapters.controllers.pedido_controller import PedidoController
+from src.app.presenters.pedido_presenter import PedidoPresenter
 
 def main() -> None:
-    # 1. Infraestrutura e Adapters
     database = MemoryDatabase()
     pedido_gateway = MemoryPedidoRepository(database)
-
-    # 2. Injeção de dependência do Use Case
     criar_pedido_use_case = CriarPedido(pedido_gateway)
+    presenter = PedidoPresenter()
 
-    # 3. Controller
-    controller = PedidoController(criar_pedido_use_case)
+    controller = PedidoController(
+        criar_pedido_use_case=criar_pedido_use_case,
+        presenter=presenter
+    )
 
-    # 4. Execução dos fluxos de criação de pedidos
+    # Criação dos pedidos
     pedido1 = controller.criar_pedido("Cliente A", 100.0, "normal")
-    pedido2 = controller.criar_pedido("Cliente B", 100.0, "vip")
-    pedido3 = controller.criar_pedido("Cliente C", 100.0, "premium")
+    pedido2 = controller.criar_pedido("Cliente B", 200.0, "premium")
+    pedido3 = controller.criar_pedido("Cliente C", 300.0, "vip")
 
-    # 5. Exibição dos resultados
     print("Pedidos criados:")
-    print(pedido1.cliente, pedido1.valor_original, pedido1.valor_final())
-    print(pedido2.cliente, pedido2.valor_original, pedido2.valor_final())
-    print(pedido3.cliente, pedido3.valor_original, pedido3.valor_final())
+    print(pedido1)
+    print(pedido2)
+    print(pedido3)
+
+    print("\nPedidos salvos:")
+    for pedido in controller.listar_pedidos():
+        print(pedido)
 
 if __name__ == "__main__":
     main()
